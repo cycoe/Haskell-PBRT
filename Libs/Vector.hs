@@ -1,5 +1,7 @@
 module Libs.Vector where
 
+import qualified Libs.Utils as U
+
 class Vector v where
   vector_with_vector :: (t -> t -> t) -> v t -> v t -> v t
   vector_with_scalar :: (t -> t -> t) -> v t -> t -> v t
@@ -34,8 +36,13 @@ data Vector3 t = Vector3 { x :: {-# UNPACK #-} !t
                          , z :: {-# UNPACK #-} !t
                          }
 
+type Vector3f = Vector3 Float
+
 instance Show t => Show (Vector3 t) where
   show (Vector3 a b c) = "[" ++ show a ++ ", " ++ show b ++ ", " ++ show c ++ "]"
+
+instance Functor Vector3 where
+  fmap f (Vector3 a b c) = Vector3 (f a) (f b) (f c)
 
 instance Vector Vector3 where
   vector_with_vector op (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) =
@@ -53,3 +60,9 @@ normalize v = v ./ norm v
 
 dot :: Num t => Vector3 t -> Vector3 t -> t
 dot (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) = a1 * a2 + b1 * b2 + c1 * c2
+
+clamp :: Ord t => t -> t -> Vector3 t -> Vector3 t
+clamp m n v = U.clamp m n <$> v
+
+pow :: Floating t => Vector3 t -> t -> Vector3 t
+pow v m = (**m) <$> v
