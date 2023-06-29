@@ -1,9 +1,12 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Libs.Spectrum where
 
 import qualified Libs.Vector as V
 
 -- Spectrum described by RGB
-type SpectrumRGB = V.Vector3f
+type SpectrumRGB = V.Vector3 Float
 
 -- Screnn pixel described by RGB
 type ScreenRGB = V.Vector3 Int
