@@ -11,7 +11,7 @@ data Framebuffer s = Framebuffer { get_w :: Int
 
 create_framebuffer :: Int -> Int -> Framebuffer s
 create_framebuffer w h = Framebuffer w h $ do
-  buffer <- MV.new $ w * h
+  buffer <- MV.replicate (w * h) (V.Vector3 0 0 0)
   return buffer
 
 update_pixel :: Framebuffer s -> Int -> Int -> Vector3f -> Framebuffer s
