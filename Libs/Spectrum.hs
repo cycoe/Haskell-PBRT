@@ -12,7 +12,9 @@ type SpectrumRGB = V.Vector3 Float
 type ScreenRGB = V.Vector3 Int
 
 class Spectrum s where
+  zero :: s
   to_screen_rgb :: s -> ScreenRGB
 
 instance Spectrum SpectrumRGB where
+  zero = V.Vector3 0 0 0
   to_screen_rgb v = floor <$> 255 V.*. V.pow (V.clamp 0 1 v) 0.6
