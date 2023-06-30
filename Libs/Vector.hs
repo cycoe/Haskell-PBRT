@@ -66,3 +66,6 @@ clamp m n v = U.clamp m n <$> v
 
 pow :: Floating t => Vector3 t -> t -> Vector3 t
 pow v m = (**m) <$> v
+
+toList :: Vector3 t -> [t]
+toList (Vector3 a b c) = [a, b, c]
