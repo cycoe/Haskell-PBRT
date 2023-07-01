@@ -61,6 +61,13 @@ normalize v = v ./ norm v
 dot :: Num t => Vector3 t -> Vector3 t -> t
 dot (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) = a1 * a2 + b1 * b2 + c1 * c2
 
+cross :: Num t => Vector3 t -> Vector3 t -> Vector3 t
+cross (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) =
+  Vector3
+  (b1 * c2 - c1 * b2)
+  (c1 * a2 - a1 * c2)
+  (a1 * b2 - b1 * a2)
+
 clamp :: Ord t => t -> t -> Vector3 t -> Vector3 t
 clamp m n v = U.clamp m n <$> v
 
