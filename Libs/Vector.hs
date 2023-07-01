@@ -88,3 +88,15 @@ pow v m = (**m) <$> v
 
 toList :: Vector3 t -> [t]
 toList (Vector3 a b c) = [a, b, c]
+
+vmin :: Ord t => Vector3 t -> Vector3 t -> Vector3 t
+vmin (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) = Vector3
+  (Prelude.min a1 a2)
+  (Prelude.min b1 b2)
+  (Prelude.min c1 c2)
+
+vmax :: Ord t => Vector3 t -> Vector3 t -> Vector3 t
+vmax (Vector3 a1 b1 c1) (Vector3 a2 b2 c2) = Vector3
+  (Prelude.max a1 a2)
+  (Prelude.max b1 b2)
+  (Prelude.max c1 c2)
