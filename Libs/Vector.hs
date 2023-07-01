@@ -6,28 +6,40 @@ class Vector v where
   vector_with_vector :: (t -> t -> t) -> v t -> v t -> v t
   vector_with_scalar :: (t -> t -> t) -> v t -> t -> v t
   scalar_with_vector :: (t -> t -> t) -> t -> v t -> v t
+  infixl 6 .+.
   (.+.) :: Num t => v t -> v t -> v t
   (.+.) = vector_with_vector (Prelude.+)
+  infixl 6 .-.
   (.-.) :: Num t => v t -> v t -> v t
   (.-.) = vector_with_vector (Prelude.-)
+  infixl 7 .*.
   (.*.) :: Num t => v t -> v t -> v t
   (.*.) = vector_with_vector (Prelude.*)
+  infixl 7 ./.
   (./.) :: Fractional t => v t -> v t -> v t
   (./.) = vector_with_vector (Prelude./)
+  infixl 6 .+
   (.+) :: Num t => v t -> t -> v t
   (.+) = vector_with_scalar (Prelude.+)
+  infixl 6 .-
   (.-) :: Num t => v t -> t -> v t
   (.-) = vector_with_scalar (Prelude.-)
+  infixl 7 .*
   (.*) :: Num t => v t -> t -> v t
   (.*) = vector_with_scalar (Prelude.*)
+  infixl 7 ./
   (./) :: Fractional t => v t -> t -> v t
   (./) = vector_with_scalar (Prelude./)
+  infixl 6 +.
   (+.) :: Num t => t -> v t -> v t
   (+.) = scalar_with_vector (Prelude.+)
+  infixl 6 -.
   (-.) :: Num t => t -> v t -> v t
   (-.) = scalar_with_vector (Prelude.-)
+  infixl 7 *.
   (*.) :: Num t => t -> v t -> v t
   (*.) = scalar_with_vector (Prelude.*)
+  infixl 7 /.
   (/.) :: Fractional t => t -> v t -> v t
   (/.) = scalar_with_vector (Prelude./)
 
