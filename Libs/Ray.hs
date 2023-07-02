@@ -7,7 +7,7 @@ data Ray = Ray { getOrigin :: Vector3 Float
                , getDirection :: Vector3 Float
                } deriving Show
 
-class Collisionable c where
+class Intersectable c where
   intersect :: c -> Ray -> Intersection
 
 transport :: Ray -> Float -> Vector3 Float
