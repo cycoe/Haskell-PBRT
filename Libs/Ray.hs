@@ -2,7 +2,7 @@
 module Libs.Ray where
 
 import Libs.Vector (Vector3, (.+.), (*.))
-import Libs.Intersection (Intersection)
+import Libs.Intersection (Intersection(..))
 import Libs.Object.Object (Object)
 
 data Ray = Ray { getOrigin :: Vector3 Float
@@ -11,6 +11,10 @@ data Ray = Ray { getOrigin :: Vector3 Float
 
 class Intersectable c where
   intersect :: c -> Ray -> Intersection
+  intersectP :: c -> Ray -> Bool
+  intersectP c ray = case intersect c ray of
+    NotIntersect -> False
+    Intersection _ _ _ -> True
 
 instance Intersectable Object where
   intersect :: Object -> Ray -> Intersection

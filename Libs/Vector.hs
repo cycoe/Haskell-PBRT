@@ -46,7 +46,7 @@ class Vector v where
 data Vector3 t = Vector3 { x :: {-# UNPACK #-} !t
                          , y :: {-# UNPACK #-} !t
                          , z :: {-# UNPACK #-} !t
-                         }
+                         } deriving Eq
 
 type Vector3f = Vector3 Float
 
