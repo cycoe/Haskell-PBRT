@@ -12,6 +12,9 @@ data Bounds3 = Bounds3 { get_p_min :: V.Vector3f
                        , get_p_max :: V.Vector3f
                        } deriving Show
 
+makeBounds3 :: V.Vector3f -> V.Vector3f -> Bounds3
+makeBounds3 p1 p2 = Bounds3 (V.vmin p1 p2) (V.vmax p1 p2)
+
 diagonal :: Bounds3 -> Vector3f
 diagonal (Bounds3 p_min p_max) = p_max .-. p_min
 
