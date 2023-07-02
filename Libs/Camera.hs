@@ -14,6 +14,10 @@ data Camera = LensCamera { getCoordinate :: Coordinate
                          , getFocalLength :: Float
                          } deriving Show
 
+-- Cast a ray from camera to render panel
+-- param Camera -> camera cast from
+-- param Tuple2 Int -> pixel indices on render panel
+-- param Tuple4 Float -> 4 random values used to determine the ray
 rayToPanel :: Camera -> Tuple2 Int -> Tuple4 Float -> Ray
 rayToPanel (LensCamera c w h fov ap fl) (x, y) (r1, r2, r3, r4) =
   let scale = tan . deg2rad $ fov * 0.5

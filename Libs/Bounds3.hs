@@ -6,6 +6,8 @@ import Libs.Axis (Axis(..))
 import Libs.Ray (Ray(..))
 import Libs.Utils (infinity)
 
+-- Bounds3 stands for a bounding box in 3D space
+-- Bounds3 can described by two vertexes with min (x, y, z) and max (x, y, z)
 data Bounds3 = Bounds3 { get_p_min :: V.Vector3f
                        , get_p_max :: V.Vector3f
                        } deriving Show
