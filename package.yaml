@@ -26,6 +26,7 @@ dependencies:
 - transformers
 - optparse-applicative
 - lens
+- hspec
 
 ghc-options:
 - -Wall
