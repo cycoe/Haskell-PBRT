@@ -1,11 +1,12 @@
 module Libs.Material.Material where
 
-import Libs.Vector (Vector3(Vector3), Vector3f, dot, (*.), (.+.), (.-.))
+import Libs.Vector (Vector3(..), Vector3f, dot, (*.), (.+.), (.-.))
+import Libs.Utils (clamp)
 
 class RenderMaterial m where
-  sample :: m -> Vector3f -> Vector3f -> Vector3f
-  pdf :: m -> Vector3f -> Vector3f -> Vector3f -> Float
-  eval :: m -> Vector3f -> Vector3f -> Vector3f -> Vector3f
+  sample :: m -> Vector3f -> Vector3f
+  pdf :: m -> Vector3f -> Vector3f -> Float
+  eval :: m -> Vector3f -> Vector3f -> Vector3f
   hasEmission :: m -> Bool
   getEmission :: m -> Vector3f
 
@@ -17,6 +18,17 @@ sin2Theta :: (Num t, Ord t) => Vector3 t -> t
 sin2Theta v = max 0 (1 - cos2Theta v)
 sinTheta :: (Ord t, Floating t) => Vector3 t -> t
 sinTheta v = sqrt $ sin2Theta v
+tan2Theta :: (Ord t, Fractional t) => Vector3 t -> t
+tan2Theta v = sin2Theta v / cos2Theta v
+
+cosPhi :: Vector3f -> Float
+cosPhi w@(Vector3 a b c) =
+  let sinThetaw = sinTheta w
+  in if sinThetaw == 0 then 1 else clamp (-1) 1 (a / sinThetaw)
+sinPhi :: Vector3f -> Float
+sinPhi w@(Vector3 a b c) =
+  let sinThetaw = sinTheta w
+  in if sinThetaw == 0 then 0 else clamp (-1) 1 (b / sinThetaw)
 
 reflect :: Vector3f -> Vector3f -> Vector3f
 reflect wi n = 2 * (dot wi n) *. n .-. wi
