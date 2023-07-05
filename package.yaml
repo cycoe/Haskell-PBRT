@@ -35,7 +35,7 @@ ghc-options:
 - -Wredundant-constraints
 
 library:
-  source-dirs: src
+  source-dirs: .
 
 executables:
   Haskell-PBRT-exe:
