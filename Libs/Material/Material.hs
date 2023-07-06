@@ -1,15 +1,17 @@
 module Libs.Material.Material where
 
+import Control.Monad.Trans.State (State)
+import System.Random (RandomGen)
 import Libs.Vector (Vector3(..), Vector3f, dot, (*.), (.+.), (.-.))
 import Libs.Spectrum (Spectrum)
 import Libs.Utils (clamp)
 
 -- Material type class
 class RenderMaterial m where
-  -- Sample wi by wo from material surface
+  -- Sample wi by wo from material surface, random generator is wrapped by state
   -- Vector3f -> wo
-  -- Vector3f -> wi sampled from wo
-  sample :: m -> Vector3f -> Vector3f
+  -- State g Vector3f -> wi sampled from wo wrapped by state
+  sample :: RandomGen g => m -> Vector3f -> State g Vector3f
   -- pdf of wi sampled by wo
   -- Vector3f -> wo
   -- Vector3f -> wi
@@ -18,7 +20,7 @@ class RenderMaterial m where
   -- Vector3f -> wi
   -- Vector3f -> wo
   -- Spectrum -> bxdf described by spectrum
-  eval :: (Spectrum s) => m -> Vector3f -> Vector3f -> s
+  eval :: Spectrum s => m -> Vector3f -> Vector3f -> s
   hasEmission :: m -> Bool
   getEmission :: m -> Vector3f
 
