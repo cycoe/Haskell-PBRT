@@ -1,12 +1,24 @@
 module Libs.Material.Material where
 
 import Libs.Vector (Vector3(..), Vector3f, dot, (*.), (.+.), (.-.))
+import Libs.Spectrum (Spectrum)
 import Libs.Utils (clamp)
 
+-- Material type class
 class RenderMaterial m where
+  -- Sample wi by wo from material surface
+  -- Vector3f -> wo
+  -- Vector3f -> wi sampled from wo
   sample :: m -> Vector3f -> Vector3f
+  -- pdf of wi sampled by wo
+  -- Vector3f -> wo
+  -- Vector3f -> wi
   pdf :: m -> Vector3f -> Vector3f -> Float
-  eval :: m -> Vector3f -> Vector3f -> Vector3f
+  -- bxdf of wi and wo
+  -- Vector3f -> wi
+  -- Vector3f -> wo
+  -- Spectrum -> bxdf described by spectrum
+  eval :: (Spectrum s) => m -> Vector3f -> Vector3f -> s
   hasEmission :: m -> Bool
   getEmission :: m -> Vector3f
 
