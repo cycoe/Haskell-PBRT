@@ -20,7 +20,7 @@ class RenderMaterial m where
   -- Vector3f -> wi
   -- Vector3f -> wo
   -- Spectrum -> bxdf described by spectrum
-  eval :: Spectrum s => m -> Vector3f -> Vector3f -> s
+  eval :: m -> Vector3f -> Vector3f -> Vector3f
   hasEmission :: m -> Bool
   getEmission :: m -> Vector3f
 
