@@ -24,6 +24,7 @@ dependencies:
 - vector
 - random
 - transformers
+- optparse-applicative
 
 ghc-options:
 - -Wall
