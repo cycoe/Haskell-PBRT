@@ -25,6 +25,7 @@ dependencies:
 - random
 - transformers
 - optparse-applicative
+- lens
 
 ghc-options:
 - -Wall
