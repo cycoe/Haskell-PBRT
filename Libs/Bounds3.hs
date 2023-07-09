@@ -37,6 +37,10 @@ union :: Bounds3 -> Bounds3 -> Bounds3
 union (Bounds3 pmin1 pmax1) (Bounds3 pmin2 pmax2)=
   Bounds3 (V.vmin pmin1 pmin2) (V.vmax pmax1 pmax2)
 
+unionPoint :: Bounds3 -> Vector3f -> Bounds3
+unionPoint (Bounds3 pmin pmax) p =
+  Bounds3 (V.vmin pmin p) (V.vmax pmax p)
+
 offset :: Bounds3 -> Vector3f -> Bounds3
 offset = undefined
 
