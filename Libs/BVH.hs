@@ -3,7 +3,8 @@ module Libs.BVH where
 
 import Data.List (sortBy)
 import Libs.Bounds3 (Bounds3(..), intersectP, union, unionPoint, centroid, max_extent)
-import Libs.Object.Object (Object(..), getObjectBounds)
+import Libs.Object.Object (Object(..))
+import Libs.Object.BaseObject (RenderObject(getObjectBounds))
 import Libs.Ray (Ray(..))
 import Libs.Intersection (Intersection(..))
 import Libs.Intersectable (Intersectable(intersect))
@@ -16,6 +17,7 @@ data BVHNode = BoxNode { getBounds :: Bounds3
                        }
              | ObjectNode { getObject :: Object
                           }
+             deriving Show
 
 data BVHSplitMethod = BVHNaiveSplit
                     | BVHSAHSplit
@@ -23,7 +25,7 @@ data BVHSplitMethod = BVHNaiveSplit
 
 data BVHAccelerator = BVHAccelerator { getSplitMethod :: BVHSplitMethod
                                      , getRootNode :: BVHNode
-                                     }
+                                     } deriving Show
 
 instance Intersectable BVHNode where
   intersect :: BVHNode -> Ray -> Intersection

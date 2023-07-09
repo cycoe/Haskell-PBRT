@@ -1,9 +1,6 @@
-module Libs.Object.Object where
+module Libs.Object.Object
+  (Object(..)) where
 
-import Libs.Bounds3 (Bounds3)
-import Libs.Ray (Ray)
+import Libs.Object.Sphere (Sphere)
 
-data Object = Object deriving Show
-
-getObjectBounds :: Object -> Bounds3
-getObjectBounds = undefined
+data Object = SphereObject Sphere deriving Show
