@@ -10,3 +10,4 @@ data Intersection = NotIntersect
                                  , getNormal :: Vector3 Float
                                  , getObject :: Object
                                  }
+                  deriving Show

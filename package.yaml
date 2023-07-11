@@ -27,6 +27,8 @@ dependencies:
 - optparse-applicative
 - lens
 - hspec
+- parallel
+- bytestring
 
 ghc-options:
 - -Wall

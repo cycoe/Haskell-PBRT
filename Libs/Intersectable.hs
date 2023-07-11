@@ -21,7 +21,7 @@ instance Intersectable Object where
 
 instance Intersectable Sphere where
   intersect :: Sphere -> Ray -> Intersection
-  intersect sphere@(Sphere center radius) ray =
+  intersect sphere@(Sphere center radius _) ray =
     let l = getOrigin ray .-. center
         a = getDirection ray `dot` getDirection ray
         b = 2 * getDirection ray `dot` l

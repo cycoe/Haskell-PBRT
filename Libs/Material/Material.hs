@@ -1,28 +1,8 @@
 module Libs.Material.Material where
 
-import Control.Monad.Trans.State (State)
-import System.Random (RandomGen)
+import Libs.Material.Diffuse (DiffuseMaterial)
 import Libs.Vector (Vector3(..), Vector3f, dot, (*.), (.+.), (.-.))
-import Libs.Spectrum (Spectrum)
 import Libs.Utils (clamp)
-
--- Material type class
-class RenderMaterial m where
-  -- Sample wi by wo from material surface, random generator is wrapped by state
-  -- Vector3f -> wo
-  -- State g Vector3f -> wi sampled from wo wrapped by state
-  sample :: RandomGen g => m -> Vector3f -> State g Vector3f
-  -- pdf of wi sampled by wo
-  -- Vector3f -> wo
-  -- Vector3f -> wi
-  pdf :: m -> Vector3f -> Vector3f -> Float
-  -- bxdf of wi and wo
-  -- Vector3f -> wi
-  -- Vector3f -> wo
-  -- Spectrum -> bxdf described by spectrum
-  eval :: m -> Vector3f -> Vector3f -> Vector3f
-  hasEmission :: m -> Bool
-  getEmission :: m -> Vector3f
 
 cosTheta :: Num t => Vector3 t -> t
 cosTheta (Vector3 _ _ c) = c
@@ -62,3 +42,5 @@ refract wi n eta =
      then Nothing
      else let cosThetaT = sqrt $ 1 - sin2ThetaT
           in Just $ (-eta) *. wi .+. (eta * cosThetaI - cosThetaT) *. n
+
+data Material = Diffuse DiffuseMaterial deriving Show

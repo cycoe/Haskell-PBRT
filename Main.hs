@@ -2,6 +2,17 @@ module Main (main) where
 
 import Options.Applicative
 import Libs.Configs (Configs(..))
+import Libs.Render (render)
+import Libs.Coordinate (Coordinate(..))
+import Libs.Camera (Camera(..))
+import Libs.Vector (Vector3(..))
+import Libs.Scene (Scene(..))
+import Libs.Object.Object (Object(..))
+import Libs.Object.Sphere (Sphere(..))
+import Libs.Material.Material (Material(..))
+import Libs.Material.Diffuse (DiffuseMaterial(..))
+import Libs.Spectrum (SpectrumRGB)
+import Libs.BVH (buildBVHAccelerator, BVHSplitMethod(..))
 
 configP :: Parser Configs
 configP = Configs
@@ -12,11 +23,23 @@ configP = Configs
              )
 
 main :: IO ()
-main = render =<< execParser opts where
+main = render . _makeScene =<< execParser opts where
   opts = info (configP <**> helper)
     ( fullDesc
    <> header "Physical-based ray tracing, but with Haskell."
     )
 
-render :: Configs -> IO ()
-render configs = print configs
+_makeScene :: Configs -> Scene
+_makeScene configs = scene where
+  scene = Scene camera bvh spp
+  camera = LensCamera coordinate 768 768 800 0 800
+  coordinate = Coordinate position front up
+  position = Vector3 278 273 (-800)
+  front = Vector3 0 0 1
+  up = Vector3 0 1 0
+  bvh = buildBVHAccelerator [sphere] BVHNaiveSplit
+  emission = Vector3 1 1 1
+  kd = Vector3 1 1 1
+  diffuse = Diffuse (DiffuseMaterial kd emission)
+  sphere = SphereObject (Sphere (Vector3 250 50 250) 50 diffuse)
+  spp = 100
