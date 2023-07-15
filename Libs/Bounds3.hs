@@ -45,7 +45,7 @@ offset :: Bounds3 -> Vector3f -> Bounds3
 offset = undefined
 
 enterExitPanel :: (Float, Float, Float, Float) -> (Float, Float)
-enterExitPanel (o, d, amin, amax) =
+enterExitPanel (amin, amax, o, d) =
   let tmin = (amin - o) / d
       tmax = (amax - o) / d
   in if d < 0 then (tmax, tmin) else (tmin, tmax)
