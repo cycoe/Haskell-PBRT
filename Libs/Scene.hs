@@ -48,7 +48,9 @@ shadePixel scene (Just i@(Intersection co n o)) wo =
   if hasEmission $ getMaterial o
   then return . getEmission . getMaterial $ o
   -- TODO: indirect illuminate
-  else directIlluminate scene i wo
+  else (.+.)
+       <$> directIlluminate scene i wo
+       <*> indirectIlluminate scene i wo
 
 directIlluminate :: RandomGen g => Scene -> Intersection
                  -> Vector3f -> State g SpectrumRGB
@@ -68,9 +70,31 @@ directIlluminate scene (Intersection co n o) wo = do
       cosa = max 0 $ dot n shadeToLightDir
       cosb = max 0 $ dot (getNormal hitLight) (1 -. shadeToLightDir)
       emission = getEmission . getMaterial . getObject $ hitLight
-  if norm shadeToMask < norm shadeToLight
+  if norm shadeToMask - norm shadeToLight < -0.0001
   then return $ Vector3 0 0 0
   else return $ cosa * cosb / r2 / pdfLight *. fr .*. emission
+
+indirectIlluminate :: RandomGen g => Scene -> Intersection
+                   -> Vector3f -> State g SpectrumRGB
+indirectIlluminate scene (Intersection co n o) wo = do
+  g0 <- get
+  let (p, g1) = uniformR (0, 1) g0
+  put g1
+  if p > (0.8 :: Float)
+  then return $ Vector3 0 0 0
+  else do
+    let material = getMaterial o
+    -- TODO: world to local
+    wi <- Libs.Material.RenderMaterial.sample material wo
+    let _pdf = pdf material wo wi
+        rayToNext = Ray co wi
+        hitNext = intersect (scene ^. bvh) rayToNext
+        fr = eval material wi wo
+        coswi = max 0 $ dot n wi
+        nextWo = (1 -. wi)
+    case hitNext of
+      Nothing -> return $ Vector3 0 0 0
+      Just _  -> (coswi / _pdf / 0.8 *. fr .*.) <$> shadePixel scene hitNext nextWo
 
 sampleLight :: RandomGen g => Scene -> State g (Intersection, Float)
 sampleLight scene = do

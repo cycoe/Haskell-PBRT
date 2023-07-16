@@ -33,7 +33,7 @@ instance Intersectable Sphere where
       case solveQuadratic (a, b, c) of
         Nothing       -> Nothing
         Just (t0, t1) ->
-          if t1 < 0 then Nothing
-          else if t0 < 0
+          if t1 < 0.001 then Nothing
+          else if t0 < 0.001
           then Just $ _makeIntersect t1
           else Just $ _makeIntersect t0

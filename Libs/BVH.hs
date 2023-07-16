@@ -43,7 +43,11 @@ instance Intersectable BVHNode where
           then hitL
           else hitR
    else Nothing
-  intersect (ObjectNode o) ray = intersect o ray
+  intersect (ObjectNode o) ray@(Ray origin _) = do
+    i@(Intersection co _ _) <- intersect o ray
+    if norm (co .-. origin) < 0.001
+    then Nothing
+    else return i
 
 instance Intersectable BVHAccelerator where
   intersect :: BVHAccelerator -> Ray -> Maybe Intersection
