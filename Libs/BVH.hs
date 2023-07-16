@@ -28,28 +28,36 @@ data BVHAccelerator = BVHAccelerator { getSplitMethod :: BVHSplitMethod
                                      } deriving Show
 
 instance Intersectable BVHNode where
-  intersect :: BVHNode -> Ray -> Intersection
+  intersect :: BVHNode -> Ray -> Maybe Intersection
   intersect (BoxNode b l r) ray@(Ray o d) =
     if intersectP b ray
     then
       let hitL = intersect l ray
           hitR = intersect r ray
       in case (hitL, hitR) of
-        (NotIntersect, hitR) -> hitR
-        (hitL, NotIntersect) -> hitL
-        (Intersection col _ _, Intersection cor _ _) ->
+        (Nothing, Nothing)   -> Nothing
+        (Nothing, Just hitR) -> Just hitR
+        (Just hitL, Nothing) -> Just hitL
+        (Just (Intersection col _ _), Just (Intersection cor _ _)) ->
           if norm (col .-. o) < norm (cor .-. o)
           then hitL
           else hitR
-   else NotIntersect
+   else Nothing
   intersect (ObjectNode o) ray = intersect o ray
 
 instance Intersectable BVHAccelerator where
-  intersect :: BVHAccelerator -> Ray -> Intersection
+  intersect :: BVHAccelerator -> Ray -> Maybe Intersection
   intersect (BVHAccelerator _ root) ray = intersect root ray
 
 buildBVHAccelerator :: [Object] -> BVHSplitMethod -> BVHAccelerator
 buildBVHAccelerator os sm = BVHAccelerator sm $ _buildBVHNode os sm
+
+getObjects :: BVHAccelerator -> [Object]
+getObjects (BVHAccelerator _ root) = _getObjects root
+
+_getObjects :: BVHNode -> [Object]
+_getObjects (ObjectNode o) = [o]
+_getObjects (BoxNode _ l r) = _getObjects l <> _getObjects r
 
 _buildBVHNode :: [Object] -> BVHSplitMethod -> BVHNode
 _buildBVHNode [] _       = undefined

@@ -1,23 +1,23 @@
 {-#LANGUAGE TemplateHaskell #-}
-module Libs.Scene
- ( Scene(..)
- , setCamera
- , shade
- ) where
+module Libs.Scene where
 
 import Control.Lens
 import System.Random (RandomGen, uniformR)
 import Control.Monad.Trans.State (State, get, put)
+import Data.List (find)
+import Data.Maybe (fromMaybe)
 import Libs.Camera (Camera, rayToPanel)
-import Libs.BVH (BVHAccelerator(..))
+import Libs.BVH (BVHAccelerator(..), getObjects)
 import Libs.Spectrum (SpectrumRGB)
 import Libs.Intersection (Intersection)
-import Libs.Vector (Vector3f, Vector(..), Vector3(..))
+import Libs.Vector (Vector3f, Vector(..), Vector3(..), normalize, dot, norm)
 import Libs.Ray (Ray(..))
 import Libs.Intersectable (Intersectable(..))
 import Libs.Intersection (Intersection(..))
+import Libs.Material.Material (worldToLocal)
 import Libs.Material.RenderMaterial (RenderMaterial(..))
 import Libs.Object.BaseObject (RenderObject(..))
+import Libs.Utils (sumFromHere)
 
 data Scene = Scene { _camera :: Camera
                    , _bvh :: BVHAccelerator
@@ -41,9 +41,49 @@ shade scene x y = do
   put g4
   shadePixel scene intersection (0 -. getDirection ray)
 
-shadePixel :: RandomGen g => Scene -> Intersection -> Vector3f -> State g SpectrumRGB
-shadePixel _ NotIntersect _ = return $ Vector3 0 0 0
-shadePixel scene (Intersection co n o) wo =
+shadePixel :: RandomGen g => Scene -> Maybe Intersection
+           -> Vector3f -> State g SpectrumRGB
+shadePixel _ Nothing _ = return $ Vector3 0 0 0
+shadePixel scene (Just i@(Intersection co n o)) wo =
   if hasEmission $ getMaterial o
   then return . getEmission . getMaterial $ o
-  else undefined
+  -- TODO: indirect illuminate
+  else directIlluminate scene i wo
+
+directIlluminate :: RandomGen g => Scene -> Intersection
+                 -> Vector3f -> State g SpectrumRGB
+directIlluminate scene (Intersection co n o) wo = do
+  (hitLight, pdfLight) <- sampleLight scene
+  let localCS = getLocalCS o co
+      localWo = worldToLocal wo localCS
+      shadeToLight = getCoordinate hitLight .-. co
+      shadeToLightDir = normalize shadeToLight
+      localShadeToLight = worldToLocal shadeToLightDir localCS
+      rayToLight = Ray co shadeToLightDir
+      hitMask = fromMaybe hitLight $ intersect (scene ^. bvh) rayToLight
+      shadeToMask = getCoordinate hitMask .-. co
+      material = getMaterial o
+      fr = eval material localShadeToLight localWo
+      r2 = dot shadeToLight shadeToLight
+      cosa = max 0 $ dot n shadeToLightDir
+      cosb = max 0 $ dot (getNormal hitLight) (1 -. shadeToLightDir)
+      emission = getEmission . getMaterial . getObject $ hitLight
+  if norm shadeToMask < norm shadeToLight
+  then return $ Vector3 0 0 0
+  else return $ cosa * cosb / r2 / pdfLight *. fr .*. emission
+
+sampleLight :: RandomGen g => Scene -> State g (Intersection, Float)
+sampleLight scene = do
+  gen <- get
+  -- TODO: implement more efficeint traverse and areaSum method
+  let objects = getObjects (_bvh scene)
+      areas = getArea <$> objects
+      areaAccuml = sumFromHere areas
+      -- TODO: ensure objects not null
+      areaSum = last areaAccuml
+      (p, gen') = uniformR (0, areaSum) gen
+      object = case find ((<=) p . fst) $ zip areaAccuml objects of
+        Nothing     -> last objects
+        Just (_, o) -> o
+  put gen'
+  Libs.Object.BaseObject.sample object

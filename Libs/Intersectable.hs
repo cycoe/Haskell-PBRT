@@ -1,6 +1,7 @@
 {-#LANGUAGE InstanceSigs#-}
 module Libs.Intersectable where
 
+import Data.Maybe (isJust)
 import Libs.Ray (Ray(..))
 import Libs.Vector (Vector(..), dot, normalize)
 import Libs.Intersection (Intersection(..))
@@ -9,18 +10,16 @@ import Libs.Object.Sphere (Sphere(..))
 import Libs.Utils (solveQuadratic)
 
 class Intersectable c where
-  intersect :: c -> Ray -> Intersection
+  intersect :: c -> Ray -> Maybe Intersection
   intersectP :: c -> Ray -> Bool
-  intersectP c ray = case intersect c ray of
-    NotIntersect -> False
-    Intersection _ _ _ -> True
+  intersectP c ray = isJust $ intersect c ray
 
 instance Intersectable Object where
-  intersect :: Object -> Ray -> Intersection
+  intersect :: Object -> Ray -> Maybe Intersection
   intersect (SphereObject sphere) ray = intersect sphere ray
 
 instance Intersectable Sphere where
-  intersect :: Sphere -> Ray -> Intersection
+  intersect :: Sphere -> Ray -> Maybe Intersection
   intersect sphere@(Sphere center radius _) ray =
     let l = getOrigin ray .-. center
         a = getDirection ray `dot` getDirection ray
@@ -32,9 +31,9 @@ instance Intersectable Sphere where
           normal = normalize $ coords .-. center
     in
       case solveQuadratic (a, b, c) of
-        Nothing       -> NotIntersect
+        Nothing       -> Nothing
         Just (t0, t1) ->
-          if t1 < 0 then NotIntersect
+          if t1 < 0 then Nothing
           else if t0 < 0
-          then _makeIntersect t1
-          else _makeIntersect t0
+          then Just $ _makeIntersect t1
+          else Just $ _makeIntersect t0

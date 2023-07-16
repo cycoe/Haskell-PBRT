@@ -3,6 +3,7 @@ module Libs.Utils
   , deg2rad
   , infinity
   , solveQuadratic
+  , sumFromHere
   ) where
 
 import Libs.Tuple (Tuple2, Tuple3)
@@ -29,3 +30,9 @@ solveQuadratic (a, b, c) =
       q = if b > 0 then (-0.5) * (b + sqrt discr) else (-0.5) * (b - sqrt discr)
       x0 = q / a
       x1 = c / q
+
+-- Calculate sum from head to here
+sumFromHere :: Num t => [t] -> [t]
+sumFromHere []       = []
+sumFromHere [x]      = [x]
+sumFromHere (x:y:xs) = x : (x + y) : sumFromHere (x + y : xs)

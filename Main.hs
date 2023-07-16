@@ -32,16 +32,16 @@ main = render . _makeScene =<< execParser opts where
 _makeScene :: Configs -> Scene
 _makeScene configs = scene where
   scene = Scene camera bvh spp
-  camera = LensCamera coordinate 768 768 800 0 800
+  camera = LensCamera coordinate 768 768 40 0 800
   coordinate = Coordinate position front up
   position = Vector3 278 273 (-800)
   front = Vector3 0 0 1
   up = Vector3 0 1 0
   bvh = buildBVHAccelerator [sphere1, sphere2] BVHNaiveSplit
-  emission = Vector3 1 1 1
+  emission = Vector3 60 40 30
   kd = Vector3 1 1 1
   light = Diffuse (DiffuseMaterial kd emission)
-  white = Diffuse (DiffuseMaterial kd (Vector3 0.1 0.1 0.1))
+  white = Diffuse (DiffuseMaterial kd (Vector3 0 0 0))
   sphere1 = SphereObject (Sphere (Vector3 350 100 250) 50 light)
   sphere2 = SphereObject (Sphere (Vector3 150 100 250) 50 white)
-  spp = 10
+  spp = 100
