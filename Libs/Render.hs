@@ -5,6 +5,7 @@ import System.Random (RandomGen, newStdGen)
 import Control.Parallel.Strategies (parMap, rseq)
 import Control.Monad (foldM_)
 import Control.Monad.Trans.State (runState)
+import Control.DeepSeq (force)
 import qualified Data.Vector as V
 import Libs.Scene (Scene(..), shade)
 import Libs.Framebuffer (Framebuffer(..), create_framebuffer)
@@ -33,7 +34,7 @@ _loopForSPP scene (Framebuffer w h f) spp = do
 
 -- Render a single spp to framebuffer
 _renderEachSPP :: RandomGen g => Scene -> g -> V.Vector SpectrumRGB
-_renderEachSPP scene gen = V.concat $ parMap rseq (_renderRow scene gen) rows where
+_renderEachSPP scene gen = V.concat $ parMap (rseq . force) (_renderRow scene gen) rows where
   w = getWidth  . _camera $ scene
   h = getHeight . _camera $ scene
   rows = [0 .. h - 1]

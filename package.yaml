@@ -29,6 +29,7 @@ dependencies:
 - hspec
 - parallel
 - bytestring
+- deepseq
 
 ghc-options:
 - -Wall

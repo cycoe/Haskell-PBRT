@@ -1,5 +1,8 @@
+{-#LANGUAGE DeriveGeneric#-}
 module Libs.Vector where
 
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 import qualified Libs.Utils as U
 
 class Vector v where
@@ -46,9 +49,11 @@ class Vector v where
 data Vector3 t = Vector3 { x :: {-# UNPACK #-} !t
                          , y :: {-# UNPACK #-} !t
                          , z :: {-# UNPACK #-} !t
-                         } deriving Eq
+                         } deriving (Eq, Generic)
 
 type Vector3f = Vector3 Float
+
+instance NFData t => NFData (Vector3 t)
 
 instance Show t => Show (Vector3 t) where
   show (Vector3 a b c) = "[" ++ show a ++ ", " ++ show b ++ ", " ++ show c ++ "]"
