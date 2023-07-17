@@ -96,7 +96,10 @@ indirectIlluminate scene (Intersection co n o) wo = do
         nextWo = (0 -. wi)
     case hitNext of
       Nothing -> return $ Vector3 0 0 0
-      Just _  -> (coswi / _pdf / 0.8 *. fr .*.) <$> shadePixel scene hitNext nextWo
+      Just (Intersection _ _ nextObj) ->
+        if hasEmission $ getMaterial nextObj
+        then return $ Vector3 0 0 0
+        else (coswi / _pdf / 0.8 *. fr .*.) <$> shadePixel scene hitNext nextWo
 
 sampleLight :: RandomGen g => Scene -> State g (Intersection, Float)
 sampleLight scene = do
