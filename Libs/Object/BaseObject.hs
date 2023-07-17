@@ -40,7 +40,7 @@ instance RenderObject Sphere where
         (r2, g2) = uniformR (0, 1) g1
         theta = 2 * pi * r1
         phi = pi * r2
-        dir = Vector3 (cos phi) (sin phi * cos theta) (sin phi * sin theta)
+        dir = Vector3 (sin phi * cos theta) (sin phi * sin theta) (cos phi)
         coord = c .+. r *. dir
         pdf = 1 / getArea s
         o = SphereObject s
