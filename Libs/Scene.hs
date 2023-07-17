@@ -14,7 +14,7 @@ import Libs.Vector (Vector3f, Vector(..), Vector3(..), normalize, dot, norm)
 import Libs.Ray (Ray(..))
 import Libs.Intersectable (Intersectable(..))
 import Libs.Intersection (Intersection(..))
-import Libs.Material.Material (worldToLocal)
+import Libs.Material.Material (worldToLocal, localToWorld)
 import Libs.Material.RenderMaterial (RenderMaterial(..))
 import Libs.Object.BaseObject (RenderObject(..))
 import Libs.Utils (sumFromHere)
@@ -84,14 +84,16 @@ indirectIlluminate scene (Intersection co n o) wo = do
   then return $ Vector3 0 0 0
   else do
     let material = getMaterial o
-    -- TODO: world to local
-    wi <- Libs.Material.RenderMaterial.sample material wo
-    let _pdf = pdf material wo wi
+        localCS = getLocalCS o co
+        localWo = worldToLocal wo localCS
+    localWi <- Libs.Material.RenderMaterial.sample material localWo
+    let _pdf = pdf material localWo localWi
+        wi = localToWorld localWi localCS
         rayToNext = Ray co wi
         hitNext = intersect (scene ^. bvh) rayToNext
-        fr = eval material wi wo
+        fr = eval material localWi localWo
         coswi = max 0 $ dot n wi
-        nextWo = (1 -. wi)
+        nextWo = (0 -. wi)
     case hitNext of
       Nothing -> return $ Vector3 0 0 0
       Just _  -> (coswi / _pdf / 0.8 *. fr .*.) <$> shadePixel scene hitNext nextWo
