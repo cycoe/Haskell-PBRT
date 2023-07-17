@@ -32,9 +32,9 @@ instance RenderObject Object where
 
 instance RenderObject Sphere where
   getObjectBounds :: Sphere -> Bounds3
-  getObjectBounds (Sphere c r _) = Bounds3 (c .- r) (c .+ r)
-  getMaterial (Sphere _ _ m) = m
-  sample s@(Sphere c r _) = do
+  getObjectBounds (Sphere c r _ _) = Bounds3 (c .- r) (c .+ r)
+  getMaterial (Sphere _ _ m _) = m
+  sample s@(Sphere c r _ inside) = do
     g0 <- get
     let (r1, g1) = uniformR (0, 1) g0
         (r2, g2) = uniformR (0, 1) g1
@@ -44,10 +44,11 @@ instance RenderObject Sphere where
         coord = c .+. r *. dir
         pdf = 1 / getArea s
         o = SphereObject s
+        normal = if inside then 0 -. dir else dir
     put g2
-    return (Intersection coord dir o, pdf)
-  getArea (Sphere c r _) = 4 * pi * r * r
-  getLocalCS (Sphere c r _) p = (a, b, n) where
-    n = normalize $ p .-. c
+    return (Intersection coord normal o, pdf)
+  getArea (Sphere c r _ _) = 4 * pi * r * r
+  getLocalCS (Sphere c r _ inside) p = (a, b, n) where
+    n = normalize $ if inside then c .-. p else p .-. c
     a = normalize $ Vector3 (-(z n)) 0 (x n)
     b = cross n a

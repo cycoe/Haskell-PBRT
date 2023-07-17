@@ -10,6 +10,7 @@ import Libs.Material.Material (Material)
 data Sphere = Sphere { _center :: Vector3f
                      , _radius :: Float
                      , _material :: Material
+                     , _inside :: Bool
                      } deriving Show
 
 makeLenses ''Sphere

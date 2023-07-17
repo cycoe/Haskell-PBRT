@@ -20,7 +20,7 @@ instance Intersectable Object where
 
 instance Intersectable Sphere where
   intersect :: Sphere -> Ray -> Maybe Intersection
-  intersect sphere@(Sphere center radius _) ray =
+  intersect sphere@(Sphere center radius _ inside) ray =
     let l = getOrigin ray .-. center
         a = getDirection ray `dot` getDirection ray
         b = 2 * getDirection ray `dot` l
@@ -28,7 +28,10 @@ instance Intersectable Sphere where
         _makeIntersect :: Float -> Intersection
         _makeIntersect t = Intersection coords normal (SphereObject sphere) where
           coords = getOrigin ray  .+. t *. getDirection ray
-          normal = normalize $ coords .-. center
+          normal = normalize $
+            if inside
+            then center .-. coords
+            else coords .-. center
     in
       case solveQuadratic (a, b, c) of
         Nothing       -> Nothing
