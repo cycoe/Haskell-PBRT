@@ -35,7 +35,6 @@ _loopForSPP scene (Framebuffer w h f) spp = do
 -- Render a single spp to framebuffer
 _renderEachSPP :: RandomGen g => Scene -> g -> V.Vector SpectrumRGB
 _renderEachSPP scene gen = V.concat $ parMap (rseq . force) (_renderRow scene gen) rows where
-  w = getWidth  . _camera $ scene
   h = getHeight . _camera $ scene
   rows = [0 .. h - 1]
 
@@ -43,5 +42,5 @@ _renderEachSPP scene gen = V.concat $ parMap (rseq . force) (_renderRow scene ge
 _renderRow :: RandomGen g => Scene -> g -> Int -> V.Vector SpectrumRGB
 _renderRow scene gen row = pixels where
   w = getWidth . _camera $ scene
-  indexes = V.enumFromTo 0 (w - 1)
-  (pixels, _) = runState (V.mapM (shade scene row) indexes) gen
+  cols = V.enumFromTo 0 (w - 1)
+  pixels = fst $ runState (V.mapM (\col -> shade scene col row) cols) gen
