@@ -30,6 +30,9 @@ dependencies:
 - parallel
 - bytestring
 - deepseq
+- terminal-progress-bar
+- text
+- time
 
 ghc-options:
 - -Wall

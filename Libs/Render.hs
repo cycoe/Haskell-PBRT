@@ -13,6 +13,7 @@ import Libs.Camera (Camera(..))
 import Libs.Vector (Vector(..), Vector3(..))
 import Libs.Spectrum (SpectrumRGB, Spectrum(..))
 import Libs.Image (Image(..), dump)
+import Libs.ProgressBar (RenderBar, newRenderBar, incRenderProgress)
 
 -- Render a scene to an output file
 render :: Scene -> IO ()
@@ -20,16 +21,19 @@ render scene = do
   let w = getWidth  . _camera $ scene
       h = getHeight . _camera $ scene
       framebuffer = create_framebuffer w h :: Framebuffer SpectrumRGB
-  foldM_ (_loopForSPP scene) framebuffer [0 .. _spp scene - 1]
+  pb <- newRenderBar $ _spp scene
+  foldM_ (_loopForSPP scene pb) framebuffer [0 .. _spp scene - 1]
 
-_loopForSPP :: Scene -> Framebuffer SpectrumRGB -> Int -> IO (Framebuffer SpectrumRGB)
-_loopForSPP scene (Framebuffer w h f) spp = do
+_loopForSPP :: Scene -> RenderBar s -> Framebuffer SpectrumRGB
+            -> Int -> IO (Framebuffer SpectrumRGB)
+_loopForSPP scene pb (Framebuffer w h f) spp = do
   gen <- newStdGen
   let v = _renderEachSPP scene gen
       f' = V.zipWith (.+.) f v
       p = V.toList $ V.map (to_screen_rgb . (./ fromIntegral spp)) f'
       i = ImagePPM "test.ppm" w h
   dump i p
+  incRenderProgress pb
   return $ Framebuffer w h f'
 
 -- Render a single spp to framebuffer
