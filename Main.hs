@@ -11,6 +11,7 @@ import Libs.Object.Object (Object(..))
 import Libs.Object.Sphere (Sphere(..))
 import Libs.Material.Material (Material(..))
 import Libs.Material.Diffuse (DiffuseMaterial(..))
+import Libs.Material.Specular (Specular(..))
 import Libs.Spectrum (SpectrumRGB)
 import Libs.BVH (buildBVHAccelerator, BVHSplitMethod(..))
 
@@ -43,9 +44,10 @@ _makeScene configs = scene where
   red = Diffuse (DiffuseMaterial (Vector3 0.9 0.7 0.3) (Vector3 0 0 0))
   blue = Diffuse (DiffuseMaterial (Vector3 0.1 0.3 0.7) (Vector3 0 0 0))
   grey = Diffuse (DiffuseMaterial (Vector3 0.3 0.3 0.3) (Vector3 0 0 0))
-  sphere1 = SphereObject (Sphere (Vector3 350 250 250) 50 light False)
-  sphere2 = SphereObject (Sphere (Vector3 150 250 250) 50 red False)
-  sphere3 = SphereObject (Sphere (Vector3 250 350 250) 50 blue False)
+  mirror = SpecularMaterial (Specular (Vector3 0.9 0.9 0.9) (Vector3 0 0 0))
+  sphere1 = SphereObject (Sphere (Vector3 350 250 250) 50 blue False)
+  sphere2 = SphereObject (Sphere (Vector3 150 250 250) 50 mirror False)
+  sphere3 = SphereObject (Sphere (Vector3 250 350 250) 50 light False)
   sphere4 = SphereObject (Sphere (Vector3 250 250 250) 300 grey True)
   objects = [sphere1, sphere2, sphere3, sphere4]
   spp = 100

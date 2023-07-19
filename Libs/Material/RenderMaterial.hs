@@ -4,10 +4,11 @@ module Libs.Material.RenderMaterial
 
 import System.Random (RandomGen, uniformR)
 import Control.Monad.Trans.State (State, get, put)
-import Libs.Material.Material (Material(..))
+import Libs.Material.Material (Material(..), reflect)
 import Libs.Material.Diffuse (DiffuseMaterial(..))
-import Libs.Vector (Vector3f, Vector3(..), Vector(..), norm)
-import Libs.Spectrum (SpectrumRGB)
+import Libs.Material.Specular (Specular(..))
+import Libs.Vector (Vector3f, Vector3(..), Vector(..), norm, dot)
+import Libs.Spectrum (SpectrumRGB, zero)
 
 -- Material type class
 class RenderMaterial m where
@@ -31,11 +32,15 @@ class RenderMaterial m where
 instance RenderMaterial Material where
   sample :: RandomGen g => Material -> Vector3f -> State g Vector3f
   sample (Diffuse m) wo = sample m wo
+  sample (SpecularMaterial m) wo = sample m wo
   pdf :: Material -> Vector3f -> Vector3f -> Float
   pdf (Diffuse m) wo wi = pdf m wo wi
+  pdf (SpecularMaterial m) wo wi = pdf m wo wi
   eval :: Material -> Vector3f -> Vector3f -> SpectrumRGB
   eval (Diffuse m) wi wo = eval m wi wo
+  eval (SpecularMaterial m) wi wo = eval m wi wo
   getEmission (Diffuse m) = getEmission m
+  getEmission (SpecularMaterial m) = getEmission m
 
 instance RenderMaterial DiffuseMaterial where
   sample :: RandomGen g => DiffuseMaterial -> Vector3f -> State g Vector3f
@@ -57,3 +62,19 @@ instance RenderMaterial DiffuseMaterial where
 
   getEmission :: DiffuseMaterial -> SpectrumRGB
   getEmission = Libs.Material.Diffuse._emission
+
+instance RenderMaterial Specular where
+  sample :: RandomGen g => Specular -> Vector3f -> State g Vector3f
+  sample _ wo = pure $ reflect wo
+
+  pdf :: Specular -> Vector3f -> Vector3f -> Float
+  pdf _ wo wi = if dot (reflect wo) wi > 0.99 then 1 else 0
+
+  eval :: Specular -> Vector3f -> Vector3f -> Vector3f
+  eval (Specular k _) wi wo =
+    if dot (reflect wo) wi > 0.99
+    then k ./ z wi
+    else zero
+
+  getEmission :: Specular -> SpectrumRGB
+  getEmission = Libs.Material.Specular._emission

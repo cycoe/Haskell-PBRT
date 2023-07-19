@@ -1,6 +1,7 @@
 module Libs.Material.Material where
 
 import Libs.Material.Diffuse (DiffuseMaterial)
+import Libs.Material.Specular (Specular)
 import Libs.Vector (Vector3(..), Vector3f, dot, (*.), (.+.), (.-.))
 import Libs.Utils (clamp)
 
@@ -43,8 +44,8 @@ worldToLocal w (a, b, c) = Vector3 _x _y _z where
 localToWorld :: Vector3f -> (Vector3f, Vector3f, Vector3f) -> Vector3f
 localToWorld w (a, b, c) = x w *. a .+. y w *. b .+. z w *. c
 
-reflect :: Vector3f -> Vector3f -> Vector3f
-reflect wi n = 2 * (dot wi n) *. n .-. wi
+reflect :: Vector3f -> Vector3f
+reflect (Vector3 a b c) = Vector3 (-a) (-b) c
 
 -- Refract of interface
 -- param wi -> in light
@@ -62,4 +63,6 @@ refract wi n eta =
      else let cosThetaT = sqrt $ 1 - sin2ThetaT
           in Just $ (-eta) *. wi .+. (eta * cosThetaI - cosThetaT) *. n
 
-data Material = Diffuse DiffuseMaterial deriving Show
+data Material = Diffuse DiffuseMaterial
+              | SpecularMaterial Specular
+              deriving Show
