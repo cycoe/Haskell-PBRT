@@ -3,6 +3,7 @@
 
 module Libs.Spectrum where
 
+import qualified Data.ByteString as B
 import qualified Libs.Vector as V
 import Data.Word (Word8)
 
@@ -15,7 +16,9 @@ type ScreenRGB = V.Vector3 Word8
 class Spectrum s where
   zero :: s
   to_screen_rgb :: s -> ScreenRGB
+  toByteString :: s -> B.ByteString
 
 instance Spectrum SpectrumRGB where
   zero = V.Vector3 0 0 0
   to_screen_rgb v = floor <$> 255 V.*. V.pow (V.clamp 0 1 v) 0.6
+  toByteString = B.pack . V.toList . to_screen_rgb

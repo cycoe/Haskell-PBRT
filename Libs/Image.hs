@@ -12,10 +12,10 @@ data Image = ImagePPM { getImagePath :: FilePath
                       , get_h :: Int
                       } deriving Show
 
-dump :: Image -> [ScreenRGB] -> IO ()
-dump (ImagePPM p w h) pixels = do
+dump :: Image -> [B.ByteString] -> IO ()
+dump (ImagePPM p w h) rows = do
   let header = "P6\n" ++ show w ++ " " ++ show h ++ "\n255\n"
   handle <- openFile p WriteMode
   hPutStr handle header
-  B.hPutStr handle . B.pack . concat $ map V.toList pixels
+  mapM_ (B.hPutStr handle) rows
   hClose handle
