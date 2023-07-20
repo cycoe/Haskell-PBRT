@@ -8,7 +8,7 @@ import Data.List (find)
 import Data.Maybe (fromMaybe)
 import Libs.Camera (Camera, rayToPanel)
 import Libs.BVH (BVHAccelerator(..), getObjects)
-import Libs.Spectrum (SpectrumRGB)
+import Libs.Spectrum (SpectrumRGB, zero)
 import Libs.Intersection (Intersection)
 import Libs.Vector (Vector3f, Vector(..), Vector3(..), normalize, dot, norm)
 import Libs.Ray (Ray(..))
@@ -81,7 +81,7 @@ indirectIlluminate scene (Intersection co n o) wo = do
   let (p, g1) = uniformR (0, 1) g0
   put g1
   if p > (0.8 :: Float)
-  then return $ Vector3 0 0 0
+  then return zero
   else do
     let material = getMaterial o
         localCS = getLocalCS o co
@@ -94,8 +94,8 @@ indirectIlluminate scene (Intersection co n o) wo = do
         fr = eval material localWi localWo
         coswi = max 0 $ dot n wi
         nextWo = (0 -. wi)
-    case hitNext of
-      Nothing -> return $ Vector3 0 0 0
+    if _pdf == 0 then return zero else case hitNext of
+      Nothing -> return zero
       Just (Intersection _ _ nextObj) ->
         if hasEmission $ getMaterial nextObj
         then return $ Vector3 0 0 0
