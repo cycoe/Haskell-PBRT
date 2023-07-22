@@ -9,6 +9,7 @@ import Libs.Vector (Vector3(..))
 import Libs.Scene (Scene(..))
 import Libs.Object.Object (Object(..))
 import Libs.Object.Sphere (Sphere(..))
+import Libs.Object.Triangle (Triangle, makeTriangle)
 import Libs.Material.Material (Material(..))
 import Libs.Material.Diffuse (DiffuseMaterial(..))
 import Libs.Material.Specular (Specular(..))
@@ -33,9 +34,9 @@ main = render . _makeScene =<< execParser opts where
 _makeScene :: Configs -> Scene
 _makeScene configs = scene where
   scene = Scene camera bvh spp
-  camera = LensCamera coordinate 200 200 90 0 800
+  camera = LensCamera coordinate 200 200 40 0 800
   coordinate = Coordinate position front up
-  position = Vector3 278 273 0
+  position = Vector3 278 273 (-800)
   front = Vector3 0 0 1
   up = Vector3 0 1 0
   bvh = buildBVHAccelerator objects BVHNaiveSplit
@@ -43,11 +44,35 @@ _makeScene configs = scene where
   light = Diffuse (DiffuseMaterial (Vector3 0 0 0) emission)
   red = Diffuse (DiffuseMaterial (Vector3 0.9 0.7 0.3) (Vector3 0 0 0))
   blue = Diffuse (DiffuseMaterial (Vector3 0.1 0.3 0.7) (Vector3 0 0 0))
-  grey = Diffuse (DiffuseMaterial (Vector3 0.3 0.3 0.3) (Vector3 0 0 0))
+  white = Diffuse (DiffuseMaterial (Vector3 0.75 0.7 0.5) (Vector3 0 0 0))
   mirror = SpecularMaterial (Specular (Vector3 0.9 0.9 0.9) (Vector3 0 0 0))
-  sphere1 = SphereObject (Sphere (Vector3 350 250 250) 50 blue False)
-  sphere2 = SphereObject (Sphere (Vector3 150 250 250) 50 mirror False)
-  sphere3 = SphereObject (Sphere (Vector3 250 350 250) 50 light False)
-  sphere4 = SphereObject (Sphere (Vector3 250 250 250) 300 grey True)
-  objects = [sphere1, sphere2, sphere3, sphere4]
-  spp = 100
+  sphere1 = SphereObject (Sphere (Vector3 350 150 250) 50 blue False)
+  sphere2 = SphereObject (Sphere (Vector3 150 150 250) 50 mirror False)
+  sphere3 = SphereObject (Sphere (Vector3 250 250 250) 50 light False)
+  a1 = Vector3 500 500 0
+  a2 = Vector3 0 500 0
+  a3 = Vector3 0 500 500
+  a4 = Vector3 500 500 500
+  b1 = Vector3 500 0 0
+  b2 = Vector3 0 0 0
+  b3 = Vector3 0 0 500
+  b4 = Vector3 500 0 500
+  l1 = Vector3 300 499 200
+  l2 = Vector3 200 499 200
+  l3 = Vector3 200 499 300
+  l4 = Vector3 300 499 300
+  floor1 = TriangleObject (makeTriangle b1 b2 b3 Nothing white)
+  floor2 = TriangleObject (makeTriangle b1 b3 b4 Nothing white)
+  back1 = TriangleObject (makeTriangle b4 b3 a3 Nothing white)
+  back2 = TriangleObject (makeTriangle b4 a3 a4 Nothing white)
+  left1 = TriangleObject (makeTriangle b1 b4 a4 Nothing white)
+  left2 = TriangleObject (makeTriangle b1 a4 a1 Nothing white)
+  right1 = TriangleObject (makeTriangle b2 a2 a3 Nothing white)
+  right2 = TriangleObject (makeTriangle b2 a3 b3 Nothing white)
+  top1 = TriangleObject (makeTriangle a1 a3 a2 Nothing white)
+  top2 = TriangleObject (makeTriangle a1 a4 a3 Nothing white)
+  light1 = TriangleObject (makeTriangle l1 l3 l2 Nothing light)
+  light2 = TriangleObject (makeTriangle l1 l4 l3 Nothing light)
+  objects = [sphere1, sphere2, sphere3, light1, light2,
+             floor1, floor2, back1, back2, left1, left2, right1, right2, top1, top2]
+  spp = 10
