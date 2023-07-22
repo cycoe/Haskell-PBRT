@@ -24,12 +24,12 @@ render scene = do
       h = getHeight . _camera $ scene
       framebuffer = replicate h $ V.replicate w zero
   pb <- newRenderBar $ _spp scene
-  foldM_ (_loopForSPP scene pb) framebuffer [0 .. _spp scene - 1]
+  foldM_ (_loopForSPP scene pb) framebuffer [1 .. _spp scene]
 
 _loopForSPP :: Scene -> RenderBar s -> Framebuffer -> Int -> IO (Framebuffer)
 _loopForSPP scene pb f spp = do
   gen <- newStdGen
-  let (f', bs) = _renderEachSPP scene f gen
+  let (f', bs) = _renderEachSPP scene f spp gen
       w = getWidth  . _camera $ scene
       h = getHeight . _camera $ scene
       i = ImagePPM "test.ppm" w h
@@ -38,15 +38,14 @@ _loopForSPP scene pb f spp = do
   return f'
 
 -- Render a single spp to framebuffer
-_renderEachSPP :: RandomGen g => Scene -> Framebuffer
+_renderEachSPP :: RandomGen g => Scene -> Framebuffer -> Int
                -> g -> (Framebuffer, [B.ByteString])
-_renderEachSPP scene f gen = (f', bs) where
+_renderEachSPP scene f spp gen = (f', bs) where
   rs = zipWith (_renderRow scene) gens rows `using` parList (rpar . force)
   f' = zipWith (V.zipWith (.+.)) f rs `using` parList (rpar . force)
   bs = map toBS f' `using` parList (rpar . force)
   toBS :: V.Vector SpectrumRGB -> B.ByteString
   toBS = B.concat . V.toList . V.map (toByteString . (./ fromIntegral spp))
-  spp = _spp scene
   h = getHeight . _camera $ scene
   gens = fst $ _splitGens gen h
   rows = [0 .. h - 1]
