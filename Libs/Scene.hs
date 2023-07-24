@@ -68,7 +68,7 @@ directIlluminate scene (Intersection co n o) wo = do
       fr = eval material localShadeToLight localWo
       r2 = dot shadeToLight shadeToLight
       cosa = max 0 $ dot n shadeToLightDir
-      cosb = max 0 $ dot (getNormal hitLight) (1 -. shadeToLightDir)
+      cosb = max 0 $ dot (getNormal hitLight) (0 -. shadeToLightDir)
       emission = getEmission . getMaterial . getObject $ hitLight
   if norm shadeToMask - norm shadeToLight < -0.0001
   then return $ Vector3 0 0 0
