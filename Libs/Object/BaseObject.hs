@@ -66,7 +66,9 @@ instance RenderObject Triangle where
     g0 <- get
     let (r1, g1) = uniformR (0, 1) g0
         (r2, g2) = uniformR (0, 1) g1
-        coords = (1 - r1) *. v0 .+. (r1 * (1 - r2)) *. v1 .+.  r1 * r2 *. v2
+        rx = sqrt r1
+        ry = r2
+        coords = (1 - rx) *. v0 .+. (rx * (1 - ry)) *. v1 .+.  rx * ry *. v2
     put g2
     return (Intersection coords n (TriangleObject t), 1 / a)
   getArea = Libs.Object.Triangle._area
