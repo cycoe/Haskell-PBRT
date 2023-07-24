@@ -74,10 +74,5 @@ instance RenderObject Triangle where
   getArea = Libs.Object.Triangle._area
   getLocalCS t _ = (a, b, n) where
     n@(Vector3 nx ny nz) = _normal t
-    invLen = if abs nx > abs ny
-             then 1 / sqrt (nx * nx + nz * nz)
-             else 1 / sqrt (ny * ny + nz * nz)
-    b = if abs nx > abs ny
-        then Vector3 (invLen * nz) 0 (-nx * invLen)
-        else Vector3 0 (invLen * nz) (-ny * invLen)
-    a = b `cross` n
+    a = if abs ny > 0.999 then Vector3 1 0 0 else normalize $ Vector3 (-nz) 0 nx
+    b = n `cross` a
