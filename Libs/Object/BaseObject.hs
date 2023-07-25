@@ -44,9 +44,10 @@ instance RenderObject Sphere where
     g0 <- get
     let (r1, g1) = uniformR (0, 1) g0
         (r2, g2) = uniformR (0, 1) g1
-        theta = 2 * pi * r1
-        phi = pi * r2
-        dir = Vector3 (sin phi * cos theta) (sin phi * sin theta) (cos phi)
+        rz = 1 - 2 * r1
+        rr = sqrt $ 1 - rz * rz
+        phi = 2 * pi * r2
+        dir = Vector3 (rr * cos phi) (rr * sin phi) rz
         coord = c .+. r *. dir
         pdf = 1 / getArea s
         o = SphereObject s
