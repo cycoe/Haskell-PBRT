@@ -115,4 +115,5 @@ sampleLight scene = do
         Nothing     -> last lights
         Just (_, o) -> o
   put gen'
-  Libs.Object.BaseObject.sample light
+  (i, lp) <- Libs.Object.BaseObject.sample light
+  return (i, lp * getArea light / areaSum)
