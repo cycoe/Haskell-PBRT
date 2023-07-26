@@ -1,9 +1,47 @@
+{-#LANGUAGE InstanceSigs#-}
+{-#LANGUAGE ExistentialQuantification#-}
 module Libs.Object.Object
-  (Object(..)) where
+  ( Object(..)
+  , RenderObject(..)
+  , Intersectable(..)
+  ) where
 
-import Libs.Object.Sphere (Sphere)
-import Libs.Object.Triangle (Triangle)
+import System.Random (RandomGen)
+import Control.Monad.Trans.State (State)
+import Data.Maybe (isJust)
 
-data Object = SphereObject Sphere
-            | TriangleObject Triangle
-            deriving Show
+import Libs.Vector (Vector3f)
+import Libs.Bounds3 (Bounds3)
+import Libs.Material.Material (Material)
+import Libs.Intersection (Intersection)
+import Libs.Ray (Ray)
+
+data Object = forall a. (Show a, RenderObject a, Intersectable a) => Object a
+
+instance Show Object where
+  show (Object o) = show o
+
+-- Renderable object class
+class RenderObject ro where
+  getObjectBounds :: ro -> Bounds3
+  getMaterial :: ro -> Material
+  -- sample on object returns a tuple of intersect point and pdf
+  sample :: RandomGen g => ro -> State g (Intersection Object, Float)
+  getArea :: ro -> Float
+  getLocalCS :: ro -> Vector3f -> (Vector3f, Vector3f, Vector3f)
+
+instance RenderObject Object where
+  getObjectBounds (Object o) = getObjectBounds o
+  getMaterial (Object o) = getMaterial o
+  sample (Object o) = sample o
+  getArea (Object o) = getArea o
+  getLocalCS (Object o) p = getLocalCS o p
+
+class Intersectable c where
+  intersect :: c -> Ray -> Maybe (Intersection Object)
+  intersectP :: c -> Ray -> Bool
+  intersectP c ray = isJust $ intersect c ray
+
+instance Intersectable Object where
+  intersect :: Object -> Ray -> Maybe (Intersection Object)
+  intersect (Object o) ray = intersect o ray

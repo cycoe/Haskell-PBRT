@@ -9,14 +9,12 @@ import Data.Maybe (fromMaybe)
 import Libs.Camera (Camera, rayToPanel)
 import Libs.BVH (BVHAccelerator(..), getObjects)
 import Libs.Spectrum (SpectrumRGB, zero)
-import Libs.Intersection (Intersection)
 import Libs.Vector (Vector3f, Vector(..), Vector3(..), normalize, dot, norm)
 import Libs.Ray (Ray(..))
-import Libs.Intersectable (Intersectable(..))
 import Libs.Intersection (Intersection(..))
-import Libs.Material.Material (worldToLocal, localToWorld)
+import Libs.Material.Base (worldToLocal, localToWorld)
 import Libs.Material.RenderMaterial (RenderMaterial(..))
-import Libs.Object.BaseObject (RenderObject(..))
+import Libs.Object.Object (Object, RenderObject(..), Intersectable(intersect))
 import Libs.Utils (sumFromHere)
 
 data Scene = Scene { _camera :: Camera
@@ -41,7 +39,7 @@ shade scene x y = do
   put g4
   shadePixel scene intersection (0 -. getDirection ray)
 
-shadePixel :: RandomGen g => Scene -> Maybe Intersection
+shadePixel :: RandomGen g => Scene -> Maybe (Intersection Object)
            -> Vector3f -> State g SpectrumRGB
 shadePixel _ Nothing _ = return $ Vector3 0 0 0
 shadePixel scene (Just i@(Intersection co n o)) wo =
@@ -52,7 +50,7 @@ shadePixel scene (Just i@(Intersection co n o)) wo =
        <$> directIlluminate scene i wo
        <*> indirectIlluminate scene i wo
 
-directIlluminate :: RandomGen g => Scene -> Intersection
+directIlluminate :: RandomGen g => Scene -> Intersection Object
                  -> Vector3f -> State g SpectrumRGB
 directIlluminate scene (Intersection co n o) wo = do
   (hitLight, pdfLight) <- sampleLight scene
@@ -74,7 +72,7 @@ directIlluminate scene (Intersection co n o) wo = do
   then return $ Vector3 0 0 0
   else return $ cosa * cosb / r2 / pdfLight *. fr .*. emission
 
-indirectIlluminate :: RandomGen g => Scene -> Intersection
+indirectIlluminate :: RandomGen g => Scene -> Intersection Object
                    -> Vector3f -> State g SpectrumRGB
 indirectIlluminate scene (Intersection co n o) wo = do
   g0 <- get
@@ -101,7 +99,7 @@ indirectIlluminate scene (Intersection co n o) wo = do
         then return $ Vector3 0 0 0
         else (coswi / _pdf / 0.8 *. fr .*.) <$> shadePixel scene hitNext nextWo
 
-sampleLight :: RandomGen g => Scene -> State g (Intersection, Float)
+sampleLight :: RandomGen g => Scene -> State g (Intersection Object, Float)
 sampleLight scene = do
   gen <- get
   -- TODO: implement more efficeint traverse and areaSum method
@@ -115,5 +113,5 @@ sampleLight scene = do
         Nothing     -> last lights
         Just (_, o) -> o
   put gen'
-  (i, lp) <- Libs.Object.BaseObject.sample light
+  (i, lp) <- Libs.Object.Object.sample light
   return (i, lp * getArea light / areaSum)

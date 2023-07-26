@@ -1,6 +1,7 @@
 module Libs.Material.Microfacet where
 
 import Libs.Vector (Vector3(..), Vector3f)
+import Libs.Material.Base
 import Libs.Material.Material
 import Libs.Utils (infinity)
 import Libs.Tuple (Tuple2)

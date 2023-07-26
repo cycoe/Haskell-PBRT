@@ -3,11 +3,9 @@ module Libs.BVH where
 
 import Data.List (sortBy)
 import Libs.Bounds3 (Bounds3(..), intersectP, union, unionPoint, centroid, max_extent)
-import Libs.Object.Object (Object(..))
-import Libs.Object.BaseObject (RenderObject(getObjectBounds))
+import Libs.Object.Object (Object, RenderObject(..), Intersectable(intersect))
 import Libs.Ray (Ray(..))
 import Libs.Intersection (Intersection(..))
-import Libs.Intersectable (Intersectable(intersect))
 import Libs.Vector (norm, (.-.), Vector3(..))
 import Libs.Axis (Axis(..))
 
@@ -28,7 +26,7 @@ data BVHAccelerator = BVHAccelerator { getSplitMethod :: BVHSplitMethod
                                      } deriving Show
 
 instance Intersectable BVHNode where
-  intersect :: BVHNode -> Ray -> Maybe Intersection
+  intersect :: BVHNode -> Ray -> Maybe (Intersection Object)
   intersect (BoxNode b l r) ray@(Ray o d) =
     if intersectP b ray
     then
@@ -50,7 +48,7 @@ instance Intersectable BVHNode where
     else return i
 
 instance Intersectable BVHAccelerator where
-  intersect :: BVHAccelerator -> Ray -> Maybe Intersection
+  intersect :: BVHAccelerator -> Ray -> Maybe (Intersection Object)
   intersect (BVHAccelerator _ root) ray = intersect root ray
 
 buildBVHAccelerator :: [Object] -> BVHSplitMethod -> BVHAccelerator
