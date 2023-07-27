@@ -35,4 +35,4 @@ solveQuadratic (a, b, c) =
 sumFromHere :: Num t => [t] -> [t]
 sumFromHere []       = []
 sumFromHere [x]      = [x]
-sumFromHere (x:y:xs) = x : (x + y) : sumFromHere (x + y : xs)
+sumFromHere (x:y:xs) = x : sumFromHere (x + y : xs)

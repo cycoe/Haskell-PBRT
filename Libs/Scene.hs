@@ -109,7 +109,7 @@ sampleLight scene = do
       -- TODO: ensure objects not null
       areaSum = last areaAccuml
       (p, gen') = uniformR (0, areaSum) gen
-      light = case find ((>) p . fst) $ zip areaAccuml lights of
+      light = case find ((<) p . fst) $ zip areaAccuml lights of
         Nothing     -> last lights
         Just (_, o) -> o
   put gen'
