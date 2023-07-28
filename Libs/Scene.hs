@@ -18,7 +18,7 @@ import Libs.Object.Object (Object, RenderObject(..), Intersectable(intersect))
 import Libs.Utils (sumFromHere)
 
 data Scene = Scene { _camera :: Camera
-                   , _bvh :: BVHAccelerator
+                   , _bvh :: BVHAccelerator Object
                    , _spp :: Int
                    } deriving Show
 makeLenses ''Scene
