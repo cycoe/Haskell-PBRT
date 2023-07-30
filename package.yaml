@@ -33,6 +33,7 @@ dependencies:
 - terminal-progress-bar
 - text
 - time
+- parsec
 
 ghc-options:
 - -Wall
