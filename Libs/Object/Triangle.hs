@@ -15,6 +15,7 @@ import Libs.Bounds3 (makeBounds3, unionPoint)
 import Libs.Vector (Vector(..), Vector3(..), Vector3f, cross, norm, normalize, dot)
 import Libs.Intersection (Intersection(..))
 import Libs.Material.Material (Material)
+import Libs.Object.Transform (Transformable(..))
 
 data Triangle = Triangle { _v0 :: Vector3f
                          , _v1 :: Vector3f
@@ -78,3 +79,19 @@ instance Intersectable Triangle where
       v = detInv * (d `dot` qvec)
       ttmp = detInv * (e2 `dot` qvec)
       coords = transport ray ttmp
+
+instance Transformable Triangle where
+  scale :: Triangle -> Float -> Triangle
+  scale (Triangle v0 v1 v2 e1 e2 n a m) s = Triangle v0' v1' v2' e1' e2' n a' m where
+    v0' = s *. v0
+    v1' = s *. v1
+    v2' = s *. v2
+    e1' = s *. e1
+    e2' = s *. e2
+    a'  = s * s * a
+
+  move :: Triangle -> Vector3f -> Triangle
+  move (Triangle v0 v1 v2 e1 e2 n a m) v = Triangle v0' v1' v2' e1 e2 n a m where
+    v0' = v .+. v0
+    v1' = v .+. v1
+    v2' = v .+. v2
