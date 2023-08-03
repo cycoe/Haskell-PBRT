@@ -6,6 +6,7 @@ import Text.Parsec.String (Parser)
 import Text.Parsec.Combinator (many1, optionMaybe)
 import Control.Applicative ((<*), (*>), (<|>))
 import Data.Maybe (fromMaybe)
+import qualified Data.Vector as V
 
 import Libs.Vector (Vector3(..))
 import Libs.Object.Triangle (Triangle, makeTriangle)
@@ -57,20 +58,22 @@ loadObj path = do
   let result = runParser (many1 sectionP) () path ls
   case result of
     Left parseE -> print parseE >> return []
-    Right sections -> return $ uncurry _makeTriangles $ _reduceSections sections
+    Right sections -> do
+      let (vs, ms) = _reduceSections sections
+      return $ _makeTriangles (V.fromList vs) ms
 
 _reduceSections :: [ObjSection] -> ([Vector3 Float], [Vector3 Int])
 _reduceSections [] = ([], [])
 _reduceSections ((Vertex v):xs)  = (v:vs, ms) where (vs, ms) = _reduceSections xs
 _reduceSections ((Mapping m):xs) = (vs, m:ms) where (vs, ms) = _reduceSections xs
 
-_makeTriangles :: [Vector3 Float] -> [Vector3 Int] -> [Triangle]
+_makeTriangles :: V.Vector (Vector3 Float) -> [Vector3 Int] -> [Triangle]
 _makeTriangles _ [] = []
 _makeTriangles vs ((Vector3 i1 i2 i3):ms) =
   makeTriangle a b c Nothing m : _makeTriangles vs ms where
-    a = vs !! (i1 - 1)
-    b = vs !! (i2 - 1)
-    c = vs !! (i3 - 1)
+    a = vs V.! (i1 - 1)
+    b = vs V.! (i2 - 1)
+    c = vs V.! (i3 - 1)
     -- TODO Here we use a dummy material, next version we will move material section
     -- into Object
     m = Material $ Diffuse (Vector3 0 0 0) (Vector3 0 0 0)
