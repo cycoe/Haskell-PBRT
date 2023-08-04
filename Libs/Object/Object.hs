@@ -1,3 +1,4 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
 {-#LANGUAGE ExistentialQuantification#-}
 module Libs.Object.Object
@@ -8,6 +9,8 @@ module Libs.Object.Object
 
 import System.Random (RandomGen)
 import Control.Monad.Trans.State (State)
+import Control.DeepSeq (NFData(..))
+import GHC.Generics (Generic)
 import Data.Maybe (isJust)
 
 import Libs.Vector (Vector3f)
@@ -16,7 +19,18 @@ import Libs.Material.Material (Material)
 import Libs.Intersection (Intersection)
 import Libs.Ray (Ray)
 
-data Object = forall a. (Show a, RenderObject a, Intersectable a) => Object a
+data Object = forall a. ( Show a
+                        , Generic a
+                        , NFData a
+                        , RenderObject a
+                        , Intersectable a
+                        ) => Object a
+
+instance Generic Object
+
+-- | Enable evaluated to NFData
+instance NFData Object where
+  rnf (Object o) = rnf o
 
 instance Show Object where
   show (Object o) = show o

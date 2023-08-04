@@ -1,4 +1,8 @@
+{-#LANGUAGE DeriveGeneric#-}
 module Libs.Camera where
+
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 
 import Libs.Coordinate (Coordinate(..), getRight)
 import Libs.Ray (Ray(..))
@@ -12,7 +16,10 @@ data Camera = LensCamera { getCoordinate :: Coordinate
                          , getFOV :: Float
                          , getAperture :: Float
                          , getFocalLength :: Float
-                         } deriving Show
+                         } deriving (Show, Generic)
+
+-- | Enable evaluated to NFData
+instance NFData Camera
 
 -- Cast a ray from camera to render panel
 -- param Camera -> camera cast from

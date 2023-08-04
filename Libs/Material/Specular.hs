@@ -1,3 +1,4 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
 {-#LANGUAGE TemplateHaskell#-}
 module Libs.Material.Specular
@@ -5,6 +6,8 @@ module Libs.Material.Specular
 
 import Control.Lens (makeLenses)
 import Control.Monad.Trans.State (State)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 import System.Random (RandomGen)
 
 import Libs.Vector (Vector(..), Vector3(..), Vector3f, dot)
@@ -14,9 +17,12 @@ import Libs.Spectrum (Spectrum(..), SpectrumRGB(..))
 
 data Specular = Specular { _ks :: SpectrumRGB
                          , _emission :: SpectrumRGB
-                         } deriving Show
+                         } deriving (Show, Generic)
 
 makeLenses ''Specular
+
+-- | Enable evaluated to NFData
+instance NFData Specular
 
 instance RenderMaterial Specular where
   sample :: RandomGen g => Specular -> Vector3f -> State g Vector3f

@@ -1,3 +1,4 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
 {-#LANGUAGE TemplateHaskell#-}
 module Libs.Object.Triangle
@@ -7,6 +8,8 @@ module Libs.Object.Triangle
 
 import Data.Maybe (fromMaybe)
 import Control.Monad.Trans.State (get, put)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 import System.Random (uniformR)
 
 import Libs.Ray (Ray(..), transport)
@@ -29,7 +32,7 @@ data Triangle = Triangle { _v0 :: Vector3f
                          -- otherwise it's calculated by (v1 - v0) `cross` (v2 - v0)
                          , _area :: Float
                          , _material :: Material
-                         } deriving Show
+                         } deriving (Show, Generic)
 
 makeTriangle :: Vector3f -- ^ v0
              -> Vector3f -- ^ v1
@@ -42,6 +45,9 @@ makeTriangle v0 v1 v2 mn m = Triangle v0 v1 v2 e1 e2 n a m where
   e2 = v2 .-. v0
   a = 0.5 * norm (cross e1 e2)
   n = fromMaybe (normalize $ cross e1 e2) mn
+
+-- | Enable evaluated to NFData
+instance NFData Triangle
 
 instance RenderObject Triangle where
   getObjectBounds (Triangle v0 v1 v2 _ _ _ _ _) = makeBounds3 v0 v1 `unionPoint` v2

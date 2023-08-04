@@ -1,9 +1,12 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
 module Libs.BVH where
 
 import Data.List (sortBy)
 import System.Random (RandomGen, uniformR)
 import Control.Monad.Trans.State (State, get, put)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 
 import Libs.Bounds3 (Bounds3(..), intersectP, union, unionPoint, centroid, max_extent)
 import Libs.Object.Object (Object, RenderObject(..), Intersectable(intersect))
@@ -21,19 +24,28 @@ data BVHNode o = BoxNode
                  Float        -- ^ Area sum of all objects
                | ObjectNode
                  o            -- ^ Object wrapped by an ObjectNode
-               deriving Show
+               deriving (Show, Generic)
 
 -- | BVH structure split method, BVHNaiveSplit is implemented
 data BVHSplitMethod = BVHNaiveSplit
                     | BVHSAHSplit
-                    deriving Show
+                    deriving (Show, Generic)
 
 -- | BVH accelerating structure
 data BVHAccelerator o = BVHAccelerator
                         { _splitMethod :: BVHSplitMethod
                         , _rootNode :: BVHNode o
                         }
-                      deriving Show
+                      deriving (Show, Generic)
+
+-- | Enable evaluated to NFData
+instance NFData BVHSplitMethod
+
+-- | Enable evaluated to NFData
+instance NFData o => NFData (BVHNode o)
+
+-- | Enable evaluated to NFData
+instance NFData o => NFData (BVHAccelerator o)
 
 instance Intersectable o => Intersectable (BVHNode o) where
   intersect :: BVHNode o -> Ray -> Maybe (Intersection Object)

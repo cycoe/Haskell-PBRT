@@ -1,10 +1,13 @@
-{-#LANGUAGE TemplateHaskell#-}
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
+{-#LANGUAGE TemplateHaskell#-}
 module Libs.Material.Diffuse
   (Diffuse(..)) where
 
 import Control.Lens (makeLenses)
 import Control.Monad.Trans.State (State, get, put)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 import System.Random (RandomGen, uniformR)
 
 import Libs.Material.RenderMaterial (RenderMaterial(..))
@@ -13,9 +16,12 @@ import Libs.Spectrum (SpectrumRGB)
 
 data Diffuse = Diffuse { _kd :: SpectrumRGB
                        , _emission :: SpectrumRGB
-                       } deriving Show
+                       } deriving (Show, Generic)
 
 makeLenses ''Diffuse
+
+-- | Enable evaluated to NFData
+instance NFData Diffuse
 
 instance RenderMaterial Diffuse where
   sample :: RandomGen g => Diffuse -> Vector3f -> State g Vector3f

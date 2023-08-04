@@ -1,8 +1,11 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
 module Libs.Object.TriangleMesh where
 
 import System.Random (RandomGen)
 import Control.Monad.Trans.State (State)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 
 import Libs.Vector (Vector3f)
 import Libs.Object.Object (Object(..), RenderObject(..), Intersectable(..))
@@ -16,7 +19,7 @@ import Libs.Intersection (Intersection(..))
 data TriangleMesh = TM { _bvh :: BVHAccelerator Triangle
                        , _area :: Float
                        , _material :: Material
-                       } deriving Show
+                       } deriving (Show, Generic)
 
 makeTriangleMesh :: [Triangle] -> Material -> TriangleMesh
 makeTriangleMesh ts m = TM bvh area m where
@@ -24,6 +27,9 @@ makeTriangleMesh ts m = TM bvh area m where
   ts' = (\t -> t {Libs.Object.Triangle._material = m}) <$> ts
   bvh = buildBVHAccelerator ts' BVHNaiveSplit
   area = sum $ Libs.Object.Triangle._area <$> ts
+
+-- | Enable evaluated to NFData
+instance NFData TriangleMesh
 
 instance RenderObject TriangleMesh where
   getObjectBounds :: TriangleMesh -> Bounds3

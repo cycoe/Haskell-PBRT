@@ -1,3 +1,4 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE TemplateHaskell #-}
 module Libs.Scene where
 
@@ -6,6 +7,9 @@ import System.Random (RandomGen, uniformR)
 import Control.Monad.Trans.State (State, get, put)
 import Data.List (find)
 import Data.Maybe (fromMaybe)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
+
 import Libs.Camera (Camera, rayToPanel)
 import Libs.BVH (BVHAccelerator(..), getObjects)
 import Libs.Spectrum (SpectrumRGB, zero)
@@ -20,8 +24,11 @@ import Libs.Utils (sumFromHere)
 data Scene = Scene { _camera :: Camera
                    , _bvh :: BVHAccelerator Object
                    , _spp :: Int
-                   } deriving Show
+                   } deriving (Show, Generic)
 makeLenses ''Scene
+
+-- | Enable evaluated to NFData
+instance NFData Scene
 
 setCamera :: Scene -> Camera -> Scene
 setCamera s c = camera .~ c $ s

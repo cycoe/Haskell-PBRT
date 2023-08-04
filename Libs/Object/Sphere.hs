@@ -1,3 +1,4 @@
+{-#LANGUAGE DeriveGeneric#-}
 {-#LANGUAGE InstanceSigs#-}
 {-#LANGUAGE TemplateHaskell#-}
 module Libs.Object.Sphere
@@ -6,6 +7,8 @@ module Libs.Object.Sphere
 import System.Random (uniformR)
 import Control.Lens (makeLenses)
 import Control.Monad.Trans.State (get, put)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
 
 import Libs.Ray (Ray(..))
 import Libs.Object.Object (Object(..), RenderObject(..), Intersectable(..))
@@ -20,9 +23,12 @@ data Sphere = Sphere { _center :: Vector3f
                      , _radius :: Float
                      , _material :: Material
                      , _inside :: Bool
-                     } deriving Show
+                     } deriving (Show, Generic)
 
 makeLenses ''Sphere
+
+-- | Enable evaluated to NFData
+instance NFData Sphere
 
 instance RenderObject Sphere where
   getObjectBounds :: Sphere -> Bounds3

@@ -1,6 +1,10 @@
+{-#LANGUAGE DeriveGeneric#-}
 module Libs.Bounds3 where
 
 import Data.List (zip4)
+import Control.DeepSeq (NFData)
+import GHC.Generics (Generic)
+
 import Libs.Vector as V
 import Libs.Axis (Axis(..))
 import Libs.Ray (Ray(..))
@@ -10,10 +14,13 @@ import Libs.Utils (infinity)
 -- Bounds3 can described by two vertexes with min (x, y, z) and max (x, y, z)
 data Bounds3 = Bounds3 { get_p_min :: V.Vector3f
                        , get_p_max :: V.Vector3f
-                       } deriving Show
+                       } deriving (Show, Generic)
 
 makeBounds3 :: V.Vector3f -> V.Vector3f -> Bounds3
 makeBounds3 p1 p2 = Bounds3 (V.vmin p1 p2) (V.vmax p1 p2)
+
+-- | Enable evaluated to NFData
+instance NFData Bounds3
 
 diagonal :: Bounds3 -> Vector3f
 diagonal (Bounds3 p_min p_max) = p_max .-. p_min
