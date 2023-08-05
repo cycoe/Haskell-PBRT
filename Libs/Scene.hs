@@ -72,7 +72,7 @@ directIlluminate scene (Intersection co n o) wo = do
       material = getMaterial o
       fr = eval material localShadeToLight localWo
       r2 = dot shadeToLight shadeToLight
-      cosa = max 0 $ dot n shadeToLightDir
+      cosa = abs $ dot n shadeToLightDir
       cosb = max 0 $ dot (getNormal hitLight) (0 -. shadeToLightDir)
       emission = getEmission . getMaterial . getObject $ hitLight
   if norm shadeToMask - norm shadeToLight < -0.0001
@@ -97,7 +97,7 @@ indirectIlluminate scene (Intersection co n o) wo = do
         rayToNext = Ray co wi
         hitNext = intersect (scene ^. bvh) rayToNext
         fr = eval material localWi localWo
-        coswi = max 0 $ dot n wi
+        coswi = abs $ dot n wi
         nextWo = (0 -. wi)
     if _pdf == 0 then return zero else case hitNext of
       Nothing -> return zero

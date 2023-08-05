@@ -45,18 +45,42 @@ localToWorld w (a, b, c) = x w *. a .+. y w *. b .+. z w *. c
 reflect :: Vector3f -> Vector3f
 reflect (Vector3 a b c) = Vector3 (-a) (-b) c
 
--- Refract of interface
--- param wi -> in light
--- param n -> normal vector of interface
--- param eta -> index ratio of interface
--- return -> Just wo if wo exists
---           Nothing if fully reflection happened
-refract :: Vector3f -> Vector3f -> Float -> Maybe Vector3f
-refract wi n eta =
-  let cosThetaI = dot wi n
-      sin2ThetaI = max 0 $ 1 - cosThetaI * cosThetaI
-      sin2ThetaT = eta * eta * sin2ThetaI
-  in if sin2ThetaT >= 1
-     then Nothing
-     else let cosThetaT = sqrt $ 1 - sin2ThetaT
-          in Just $ (-eta) *. wi .+. (eta * cosThetaI - cosThetaT) *. n
+-- | Refraction of interface
+refract :: Vector3f       -- ^ direction of incident ray
+        -> Vector3f       -- ^ normal of interface
+        -> Float          -- ^ eta ratio of (etaI / etaT)
+        -> Maybe Vector3f -- ^ Just wo if wo exists
+                          --   Nothing if total internal reflection happened
+refract wi n eta
+  | sin2ThetaT < 1 = Just $ (-eta) *. wi .+. (eta * cosThetaI' - cosThetaT) *. n'
+  -- Handle total internal reflection transmission
+  | otherwise = Nothing
+  where
+    cosThetaI = dot wi n
+    -- reverse normal along wi direction
+    n' = if cosThetaI < 0 then (Vector3 0 0 0) .-. n else n
+    cosThetaI' = abs cosThetaI
+    sin2ThetaI = max 0 $ 1 - cosThetaI' * cosThetaI'
+    sin2ThetaT = eta * eta * sin2ThetaI
+    cosThetaT = sqrt $ 1 - sin2ThetaT
+
+-- | Fresnel of dielectric materials
+frDielectric :: Float -- ^ cos theta of incident ray
+             -> Float -- ^ eta of incident ray
+             -> Float -- ^ eta of transmission ray
+             -> Float -- ^ fresnel cofficient of dielectric material interface
+frDielectric cosThetaI etaI etaT
+  | sinThetaT < 1 = (rparl * rparl + rperp * rperp) / 2
+  | otherwise = 1
+  where
+    cosThetaI' = clamp (-1) 1 cosThetaI
+    entering = cosThetaI' > 0
+    (etaI', etaT') = if entering then (etaI, etaT) else (etaT, etaI)
+    cosThetaI'' = abs cosThetaI'
+    sinThetaI = sqrt $ max 0 (1 - cosThetaI'' * cosThetaI'')
+    sinThetaT = etaI / etaT * sinThetaI
+    cosThetaT = sqrt $ max 0 (1 - sinThetaT * sinThetaT)
+    rparl = ((etaT' * cosThetaI'') - (etaI' * cosThetaT)) /
+            ((etaT' * cosThetaI'') + (etaI' * cosThetaT))
+    rperp = ((etaI' * cosThetaI'') - (etaT' * cosThetaT)) /
+            ((etaI' * cosThetaI'') + (etaT' * cosThetaT))
