@@ -12,7 +12,10 @@ import Libs.Object.Sphere (Sphere(..))
 import Libs.Object.Triangle (Triangle)
 import Libs.Object.TriangleMesh (makeTriangleMesh)
 import Libs.Object.ObjLoader (loadObj)
+import Libs.Object.Transform (Transformable(..))
 import Libs.Material.Material (Material(..))
+import Libs.Material.Microfacet (TrowbridgeReitzDistribution(..), MicrofacetReflection(..), BSDF(..))
+import Libs.Material.Fresnel (FrConductor(..))
 import Libs.Material.Diffuse (Diffuse(..))
 import Libs.Material.Specular (Specular(..))
 import Libs.Spectrum (SpectrumRGB)
@@ -48,18 +51,27 @@ _makeScene configs = do
       green = Material (Diffuse (Vector3 0.14 0.45 0.091) (Vector3 0 0 0))
       white = Material (Diffuse (Vector3 0.725 0.71 0.68) (Vector3 0 0 0))
       mirror = Material (Specular (Vector3 0.9 0.9 0.9) (Vector3 0 0 0))
+      dist = TrowbridgeReitzDistribution 0.3 0.3 True
+      goldEta = Vector3 0.15557 0.42415 1.3831
+      goldK = Vector3 3.6024 2.4721 1.9155
+      fresnel = FrConductor (Vector3 1 1 1) goldEta goldK
+      reflection = MR (Vector3 1 1 1) dist fresnel
+      bsdf = Material $ BSDF reflection
       sphere1 = Object (Sphere (Vector3 350 150 250) 50 white False)
       sphere2 = Object (Sphere (Vector3 150 150 250) 50 mirror False)
       sphere3 = Object (Sphere (Vector3 250 250 250) 50 light False)
-      spp = 128
+      spp = 10
   floor <- flip makeTriangleMesh white <$> loadObj "./Models/cornellbox/floor.obj"
   left <- flip makeTriangleMesh red <$> loadObj "./Models/cornellbox/left.obj"
   right <- flip makeTriangleMesh green <$> loadObj "./Models/cornellbox/right.obj"
-  tall <- flip makeTriangleMesh white <$> loadObj "./Models/cornellbox/tallbox.obj"
+  tall <- flip makeTriangleMesh bsdf <$> loadObj "./Models/cornellbox/tallbox.obj"
   short <- flip makeTriangleMesh white <$> loadObj "./Models/cornellbox/shortbox.obj"
   l <- flip makeTriangleMesh light <$> loadObj "./Models/cornellbox/light.obj"
+  dragonT <- loadObj "./Models/xyzrgb_dragon.obj"
   let objects = [ Object floor, Object left, Object right
-                , Object tall, Object short, Object l]
+                , Object l, Object (makeTriangleMesh dragon bsdf)
+                ]
+      dragon = flip move (Vector3 250 80 300) . flip scale 2 <$> dragonT
       scene = Scene camera bvh spp
       bvh = buildBVHAccelerator objects BVHNaiveSplit
   return scene

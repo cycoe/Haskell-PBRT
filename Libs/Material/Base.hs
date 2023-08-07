@@ -45,6 +45,9 @@ localToWorld w (a, b, c) = x w *. a .+. y w *. b .+. z w *. c
 reflect :: Vector3f -> Vector3f
 reflect (Vector3 a b c) = Vector3 (-a) (-b) c
 
+reflectN :: Vector3f -> Vector3f -> Vector3f
+reflectN wi n = 2 * dot wi n *. n .-. wi
+
 -- | Refraction of interface
 refract :: Vector3f       -- ^ direction of incident ray
         -> Vector3f       -- ^ normal of interface
@@ -63,24 +66,3 @@ refract wi n eta
     sin2ThetaI = max 0 $ 1 - cosThetaI' * cosThetaI'
     sin2ThetaT = eta * eta * sin2ThetaI
     cosThetaT = sqrt $ 1 - sin2ThetaT
-
--- | Fresnel of dielectric materials
-frDielectric :: Float -- ^ cos theta of incident ray
-             -> Float -- ^ eta of incident ray
-             -> Float -- ^ eta of transmission ray
-             -> Float -- ^ fresnel cofficient of dielectric material interface
-frDielectric cosThetaI etaI etaT
-  | sinThetaT < 1 = (rparl * rparl + rperp * rperp) / 2
-  | otherwise = 1
-  where
-    cosThetaI' = clamp (-1) 1 cosThetaI
-    entering = cosThetaI' > 0
-    (etaI', etaT') = if entering then (etaI, etaT) else (etaT, etaI)
-    cosThetaI'' = abs cosThetaI'
-    sinThetaI = sqrt $ max 0 (1 - cosThetaI'' * cosThetaI'')
-    sinThetaT = etaI / etaT * sinThetaI
-    cosThetaT = sqrt $ max 0 (1 - sinThetaT * sinThetaT)
-    rparl = ((etaT' * cosThetaI'') - (etaI' * cosThetaT)) /
-            ((etaT' * cosThetaI'') + (etaI' * cosThetaT))
-    rperp = ((etaI' * cosThetaI'') - (etaT' * cosThetaT)) /
-            ((etaI' * cosThetaI'') + (etaT' * cosThetaT))
